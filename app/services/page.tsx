@@ -17,7 +17,6 @@ const services = [
       "API Integrations",
     ],
   },
-
   {
     icon: "💻",
     title: "Web Development",
@@ -31,7 +30,6 @@ const services = [
       "Responsive Design",
     ],
   },
-
   {
     icon: "🛒",
     title: "Shopify Development",
@@ -45,7 +43,6 @@ const services = [
       "Store Performance",
     ],
   },
-
   {
     icon: "🌐",
     title: "WordPress Development",
@@ -59,7 +56,6 @@ const services = [
       "Website Maintenance",
     ],
   },
-
   {
     icon: "📈",
     title: "Digital Marketing",
@@ -73,7 +69,6 @@ const services = [
       "Analytics Tracking",
     ],
   },
-
   {
     icon: "🎨",
     title: "Creative Design",
@@ -92,16 +87,14 @@ const services = [
 export default function ServicesPage() {
   return (
     <main className="min-h-screen bg-black text-white overflow-hidden">
-
-      {/* ✅ Navbar Added */}
       <Navbar />
 
       {/* Background Glow */}
-      <div className="absolute top-20 left-10 w-96 h-96 bg-blue-600/30 blur-[140px] rounded-full" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-600/30 blur-[140px] rounded-full" />
+      <div className="absolute top-20 left-10 w-64 sm:w-96 h-64 sm:h-96 bg-blue-600/30 blur-[100px] sm:blur-[140px] rounded-full" />
+      <div className="absolute bottom-20 right-10 w-64 sm:w-96 h-64 sm:h-96 bg-purple-600/30 blur-[100px] sm:blur-[140px] rounded-full" />
 
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center px-6 pt-32">
+      <section className="relative min-h-[60vh] sm:min-h-[80vh] flex items-center px-4 sm:px-6 pt-24 sm:pt-32">
         <div className="max-w-7xl mx-auto w-full text-center">
           <motion.div
             initial={{
@@ -116,34 +109,34 @@ export default function ServicesPage() {
               duration:0.8
             }}
           >
-            <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl mb-8">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"/>
+            <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl mb-6 sm:mb-8 text-xs sm:text-sm">
+              <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-green-400 animate-pulse"/>
               AI Powered Digital Solutions
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight">
               Transform Your Business With
               <span className="block bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text">
                 Next Generation Services
               </span>
             </h1>
 
-            <p className="max-w-3xl mx-auto mt-8 text-gray-400 text-lg">
+            <p className="max-w-3xl mx-auto mt-4 sm:mt-8 text-gray-400 text-sm sm:text-lg">
               We build AI automation systems, modern websites,
               marketing solutions and creative digital experiences
               that help businesses grow.
             </p>
 
-            <div className="mt-10 flex justify-center gap-5 flex-wrap">
+            <div className="mt-6 sm:mt-10 flex justify-center gap-3 sm:gap-5 flex-wrap">
               <a
                 href="#services"
-                className="px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 font-semibold hover:scale-105 transition"
+                className="px-6 sm:px-8 py-3 sm:py-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 font-semibold hover:scale-105 transition text-sm sm:text-base"
               >
                 Explore Services 🚀
               </a>
               <a
                 href="/contact"
-                className="px-8 py-4 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10 transition"
+                className="px-6 sm:px-8 py-3 sm:py-4 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10 transition text-sm sm:text-base"
               >
                 Start Project
               </a>
@@ -155,7 +148,7 @@ export default function ServicesPage() {
       {/* Services Grid Section */}
       <section
         id="services"
-        className="py-24 px-6 relative"
+        className="py-16 sm:py-24 px-4 sm:px-6 relative"
       >
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -175,18 +168,16 @@ export default function ServicesPage() {
             }}
             className="text-center"
           >
-            <h2 className="text-4xl md:text-5xl font-bold">
-              Our Premium <span className="text-blue-500">
-              Services
-              </span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
+              Our Premium <span className="text-blue-500">Services</span>
             </h2>
-            <p className="text-gray-400 mt-5 max-w-2xl mx-auto">
+            <p className="text-gray-400 mt-3 sm:mt-5 max-w-2xl mx-auto text-sm sm:text-base">
               Powerful digital solutions designed to automate,
               build and grow modern businesses.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-14">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-10 sm:mt-14">
             {services.map((service,index)=>(
               <motion.div
                 key={index}
@@ -209,33 +200,31 @@ export default function ServicesPage() {
                   y:-10,
                   scale:1.03
                 }}
-                className="group p-8 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl hover:border-blue-500/50 transition duration-500"
+                className="group p-6 sm:p-8 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl hover:border-blue-500/50 transition duration-500"
               >
-                <div className="text-6xl group-hover:scale-110 transition duration-300">
+                <div className="text-5xl sm:text-6xl group-hover:scale-110 transition duration-300">
                   {service.icon}
                 </div>
-                <h3 className="text-2xl font-bold mt-6">
+                <h3 className="text-xl sm:text-2xl font-bold mt-4 sm:mt-6">
                   {service.title}
                 </h3>
-                <p className="text-gray-400 mt-4 leading-relaxed">
+                <p className="text-gray-400 mt-3 sm:mt-4 leading-relaxed text-sm sm:text-base">
                   {service.description}
                 </p>
-                <ul className="mt-6 space-y-3 text-gray-300">
+                <ul className="mt-4 sm:mt-6 space-y-2 sm:space-y-3 text-gray-300 text-sm sm:text-base">
                   {service.features.map((feature,i)=>(
                     <li
                       key={i}
-                      className="flex items-center gap-3"
+                      className="flex items-center gap-2 sm:gap-3"
                     >
-                      <span className="text-blue-400">
-                        ✓
-                      </span>
+                      <span className="text-blue-400">✓</span>
                       {feature}
                     </li>
                   ))}
                 </ul>
                 <a
                   href="/contact"
-                  className="inline-block mt-8 text-blue-400 hover:text-blue-300 transition"
+                  className="inline-block mt-4 sm:mt-6 text-blue-400 hover:text-blue-300 transition text-sm sm:text-base"
                 >
                   Learn More →
                 </a>
@@ -246,8 +235,8 @@ export default function ServicesPage() {
       </section>
 
       {/* AI Automation Highlight Section */}
-      <section className="py-24 px-6">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
           <motion.div
             initial={{
               opacity:0,
@@ -264,17 +253,15 @@ export default function ServicesPage() {
               duration:0.7
             }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
               Build Smarter Business With
-              <span className="text-blue-500">
-                AI Automation
-              </span>
+              <span className="text-blue-500"> AI Automation</span>
             </h2>
-            <p className="text-gray-400 mt-6 text-lg">
+            <p className="text-gray-400 mt-4 sm:mt-6 text-base sm:text-lg">
               Our AI solutions help businesses reduce manual work,
               improve customer experience and operate 24/7.
             </p>
-            <div className="mt-8 space-y-4">
+            <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
               {[
                 "AI Customer Support Agents",
                 "Automated Business Workflows",
@@ -286,7 +273,7 @@ export default function ServicesPage() {
                   whileHover={{
                     x:10
                   }}
-                  className="p-5 rounded-2xl bg-white/5 border border-white/10"
+                  className="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10 text-sm sm:text-base"
                 >
                   🤖 {item}
                 </motion.div>
@@ -309,43 +296,43 @@ export default function ServicesPage() {
             transition={{
               duration:0.7
             }}
-            className="rounded-3xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 p-10"
+            className="rounded-3xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 p-6 sm:p-10"
           >
-            <div className="rounded-2xl bg-black/50 border border-white/10 p-8">
+            <div className="rounded-2xl bg-black/50 border border-white/10 p-6 sm:p-8">
               <div className="flex justify-between items-center">
-                <h3 className="text-xl font-semibold">
+                <h3 className="text-lg sm:text-xl font-semibold">
                   AI System Dashboard
                 </h3>
-                <span className="flex items-center gap-2 text-green-400 text-sm">
-                  <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse"/>
+                <span className="flex items-center gap-2 text-green-400 text-xs sm:text-sm">
+                  <span className="w-2 sm:w-3 h-2 sm:h-3 rounded-full bg-green-400 animate-pulse"/>
                   Online
                 </span>
               </div>
 
-              <div className="mt-8 space-y-5">
-                <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
-                  <p className="text-gray-400 text-sm">
+              <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
+                <div className="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10">
+                  <p className="text-gray-400 text-xs sm:text-sm">
                     Automated Tasks
                   </p>
-                  <h4 className="text-4xl font-bold mt-2">
+                  <h4 className="text-3xl sm:text-4xl font-bold mt-2">
                     500+
                   </h4>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
-                  <p className="text-gray-400 text-sm">
+                <div className="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10">
+                  <p className="text-gray-400 text-xs sm:text-sm">
                     Customer Support
                   </p>
-                  <h4 className="text-4xl font-bold mt-2">
+                  <h4 className="text-3xl sm:text-4xl font-bold mt-2">
                     24/7
                   </h4>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
-                  <p className="text-gray-400 text-sm">
+                <div className="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10">
+                  <p className="text-gray-400 text-xs sm:text-sm">
                     Business Efficiency
                   </p>
-                  <h4 className="text-4xl font-bold mt-2 text-blue-400">
+                  <h4 className="text-3xl sm:text-4xl font-bold mt-2 text-blue-400">
                     +90%
                   </h4>
                 </div>
@@ -356,7 +343,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-24 px-6 bg-white/5">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-white/5">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{
@@ -372,19 +359,17 @@ export default function ServicesPage() {
             }}
             className="text-center"
           >
-            <h2 className="text-4xl md:text-5xl font-bold">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
               Why Choose
-              <span className="text-blue-500">
-                Optiwebx?
-              </span>
+              <span className="text-blue-500"> Optiwebx?</span>
             </h2>
-            <p className="text-gray-400 mt-5">
+            <p className="text-gray-400 mt-3 sm:mt-5 text-sm sm:text-base">
               Technology, creativity and AI-powered solutions
               built for business growth.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 mt-14">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-10 sm:mt-14">
             {[
               ["🤖","AI First Approach"],
               ["⚡","Fast & Reliable Delivery"],
@@ -412,12 +397,12 @@ export default function ServicesPage() {
                 whileHover={{
                   y:-8
                 }}
-                className="p-8 rounded-3xl bg-black/40 border border-white/10 text-center"
+                className="p-6 sm:p-8 rounded-3xl bg-black/40 border border-white/10 text-center"
               >
-                <div className="text-5xl">
+                <div className="text-4xl sm:text-5xl">
                   {item[0]}
                 </div>
-                <h3 className="text-xl font-bold mt-5">
+                <h3 className="text-lg sm:text-xl font-bold mt-4 sm:mt-5">
                   {item[1]}
                 </h3>
               </motion.div>
@@ -427,16 +412,14 @@ export default function ServicesPage() {
       </section>
 
       {/* Our Process Section */}
-      <section className="py-24 px-6">
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center">
             Our Working
-            <span className="text-blue-500">
-              Process
-            </span>
+            <span className="text-blue-500"> Process</span>
           </h2>
 
-          <div className="grid md:grid-cols-4 gap-8 mt-14">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mt-10 sm:mt-14">
             {[
               ["01","Discovery","Understand your business goals"],
               ["02","Planning","Create the right strategy"],
@@ -448,15 +431,15 @@ export default function ServicesPage() {
                 whileHover={{
                   scale:1.05
                 }}
-                className="p-8 rounded-3xl bg-white/5 border border-white/10"
+                className="p-6 sm:p-8 rounded-3xl bg-white/5 border border-white/10"
               >
-                <span className="text-blue-400 text-xl font-bold">
+                <span className="text-blue-400 text-lg sm:text-xl font-bold">
                   {step[0]}
                 </span>
-                <h3 className="text-2xl font-bold mt-4">
+                <h3 className="text-xl sm:text-2xl font-bold mt-3 sm:mt-4">
                   {step[1]}
                 </h3>
-                <p className="text-gray-400 mt-3">
+                <p className="text-gray-400 mt-2 sm:mt-3 text-sm sm:text-base">
                   {step[2]}
                 </p>
               </motion.div>
@@ -466,7 +449,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Call To Action Section */}
-      <section className="py-24 px-6">
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{
@@ -480,21 +463,19 @@ export default function ServicesPage() {
             viewport={{
               once:true
             }}
-            className="rounded-3xl p-12 text-center bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 border border-white/10"
+            className="rounded-3xl p-6 sm:p-12 text-center bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 border border-white/10"
           >
-            <h2 className="text-4xl md:text-5xl font-bold">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
               Ready To Build Your
-              <span className="text-blue-400">
-                Digital Future?
-              </span>
+              <span className="text-blue-400"> Digital Future?</span>
             </h2>
-            <p className="text-gray-400 mt-6 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-400 mt-4 sm:mt-6 text-base sm:text-lg max-w-2xl mx-auto">
               Let's create powerful websites, AI automation
               systems and digital solutions that grow your business.
             </p>
             <a
               href="/contact"
-              className="inline-block mt-10 px-10 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 font-semibold hover:scale-105 transition"
+              className="inline-block mt-6 sm:mt-10 px-8 sm:px-10 py-3 sm:py-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 font-semibold hover:scale-105 transition text-sm sm:text-base"
             >
               Start Your Project 🚀
             </a>
@@ -503,34 +484,17 @@ export default function ServicesPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-10 text-center">
-        <h3 className="text-2xl font-bold text-white">
-          Optiwebx
-        </h3>
-        <p className="text-gray-400 mt-3">
+      <footer className="border-t border-white/10 py-8 sm:py-10 text-center">
+        <h3 className="text-xl sm:text-2xl font-bold text-white">Optiwebx</h3>
+        <p className="text-gray-400 mt-2 sm:mt-3 text-sm sm:text-base">
           AI Automation • Web Development • Digital Growth
         </p>
-        <div className="flex justify-center gap-6 mt-6 text-gray-400">
-          <a
-            href="#"
-            className="hover:text-white transition"
-          >
-            Privacy
-          </a>
-          <a
-            href="#"
-            className="hover:text-white transition"
-          >
-            Terms
-          </a>
-          <a
-            href="#"
-            className="hover:text-white transition"
-          >
-            Support
-          </a>
+        <div className="flex justify-center gap-4 sm:gap-6 mt-4 sm:mt-6 text-gray-400 text-sm sm:text-base">
+          <a href="#" className="hover:text-white transition">Privacy</a>
+          <a href="#" className="hover:text-white transition">Terms</a>
+          <a href="#" className="hover:text-white transition">Support</a>
         </div>
-        <p className="text-gray-500 text-sm mt-6">
+        <p className="text-gray-500 text-xs sm:text-sm mt-4 sm:mt-6">
           © 2026 Optiwebx. All rights reserved.
         </p>
       </footer>
