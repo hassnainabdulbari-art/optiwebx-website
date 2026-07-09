@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -32,6 +32,24 @@ export default function AdminPage() {
   const [user, setUser] = useState<any>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
+  
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Form states
+  const [formData, setFormData] = useState({
+    title: "",
+    category: "",
+    description: "",
+    image_url: "",
+  });
+  
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -49,7 +67,6 @@ export default function AdminPage() {
 
     checkUser();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (!session) {
@@ -102,6 +119,10 @@ export default function AdminPage() {
 
     setDeletingProjectId(projectId);
     try {
+      // Get the project to delete its image
+      const projectToDelete = projects.find(p => p.id === projectId);
+      
+      // Delete from database
       const { error } = await supabase
         .from("projects")
         .delete()
@@ -113,13 +134,159 @@ export default function AdminPage() {
         return;
       }
 
-      // Update UI by removing the deleted project
+      // Delete image from storage if exists
+      if (projectToDelete?.image_url) {
+        const imagePath = projectToDelete.image_url.split('/').pop();
+        if (imagePath) {
+          await supabase.storage
+            .from("projects")
+            .remove([imagePath]);
+        }
+      }
+
       setProjects(projects.filter(project => project.id !== projectId));
     } catch (error) {
       console.error("Error:", error);
       alert("An error occurred while deleting the project.");
     } finally {
       setDeletingProjectId(null);
+    }
+  };
+
+  const handleOpenModal = (project?: Project) => {
+    if (project) {
+      setIsEditing(true);
+      setEditingProjectId(project.id);
+      setFormData({
+        title: project.title,
+        category: project.category,
+        description: project.description,
+        image_url: project.image_url,
+      });
+      if (project.image_url) {
+        setImagePreview(project.image_url);
+      }
+    } else {
+      setIsEditing(false);
+      setEditingProjectId(null);
+      setFormData({
+        title: "",
+        category: "",
+        description: "",
+        image_url: "",
+      });
+      setImagePreview(null);
+      setImageFile(null);
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = fileName;
+
+    const { error: uploadError } = await supabase.storage
+      .from("projects")
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw new Error("Failed to upload image");
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("projects")
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      let imageUrl = formData.image_url;
+
+      // Upload new image if selected
+      if (imageFile) {
+        // Delete old image if editing
+        if (isEditing && formData.image_url) {
+          const oldImagePath = formData.image_url.split('/').pop();
+          if (oldImagePath) {
+            await supabase.storage
+              .from("projects")
+              .remove([oldImagePath]);
+          }
+        }
+        imageUrl = await uploadImage(imageFile);
+      }
+
+      if (isEditing && editingProjectId) {
+        // Update existing project
+        const { error } = await supabase
+          .from("projects")
+          .update({
+            title: formData.title,
+            category: formData.category,
+            description: formData.description,
+            image_url: imageUrl,
+          })
+          .eq("id", editingProjectId);
+
+        if (error) throw error;
+
+        setProjects(projects.map(p => 
+          p.id === editingProjectId 
+            ? { ...p, ...formData, image_url: imageUrl }
+            : p
+        ));
+      } else {
+        // Create new project
+        const { data, error } = await supabase
+          .from("projects")
+          .insert([{
+            title: formData.title,
+            category: formData.category,
+            description: formData.description,
+            image_url: imageUrl,
+          }])
+          .select();
+
+        if (error) throw error;
+
+        if (data) {
+          setProjects([data[0], ...projects]);
+        }
+      }
+
+      handleCloseModal();
+    } catch (error) {
+      console.error("Error saving project:", error);
+      alert("Failed to save project. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -347,13 +514,24 @@ export default function AdminPage() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden"
           >
-            <div className="p-6 border-b border-white/10">
-              <h2 className="text-2xl font-bold">
-                Projects <span className="text-purple-500">Management</span>
-              </h2>
-              <p className="text-sm text-gray-400 mt-1">
-                {projects.length} project{projects.length !== 1 ? "s" : ""} in portfolio
-              </p>
+            <div className="p-6 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h2 className="text-2xl font-bold">
+                  Projects <span className="text-purple-500">Management</span>
+                </h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  {projects.length} project{projects.length !== 1 ? "s" : ""} in portfolio
+                </p>
+              </div>
+              <button
+                onClick={() => handleOpenModal()}
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 font-medium text-white shadow-lg shadow-purple-500/25 flex items-center gap-2"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Add New Project
+              </button>
             </div>
 
             {projects.length === 0 ? (
@@ -361,7 +539,7 @@ export default function AdminPage() {
                 <div className="text-6xl mb-4">📂</div>
                 <h3 className="text-2xl font-bold text-gray-400">No Projects Yet</h3>
                 <p className="text-gray-500 mt-2">
-                  Projects you add will appear here for management.
+                  Click "Add New Project" to create your first project.
                 </p>
               </div>
             ) : (
@@ -416,23 +594,35 @@ export default function AdminPage() {
                           </p>
                         </div>
                         
-                        {/* Delete Button */}
-                        <button
-                          onClick={() => handleDeleteProject(project.id)}
-                          disabled={deletingProjectId === project.id}
-                          className="flex-shrink-0 p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {deletingProjectId === project.id ? (
-                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                            </svg>
-                          ) : (
+                        <div className="flex gap-2 flex-shrink-0">
+                          {/* Edit Button */}
+                          <button
+                            onClick={() => handleOpenModal(project)}
+                            className="p-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 transition text-blue-400 hover:text-blue-300"
+                          >
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
-                          )}
-                        </button>
+                          </button>
+                          
+                          {/* Delete Button */}
+                          <button
+                            onClick={() => handleDeleteProject(project.id)}
+                            disabled={deletingProjectId === project.id}
+                            className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {deletingProjectId === project.id ? (
+                              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                              </svg>
+                            ) : (
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
                       </div>
 
                       <p className="text-sm text-gray-400 mt-3 line-clamp-3">
@@ -450,6 +640,163 @@ export default function AdminPage() {
           </motion.div>
         </div>
       </section>
+
+      {/* Add/Edit Project Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/10 bg-black/90 backdrop-blur-xl p-6 md:p-8"
+          >
+            {/* Close Button */}
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-4 right-4 p-2 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-white"
+            >
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <h2 className="text-2xl font-bold mb-6">
+              {isEditing ? "Edit" : "Add New"} <span className="text-purple-500">Project</span>
+            </h2>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Project Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition text-white placeholder-gray-500"
+                  placeholder="Enter project title"
+                />
+              </div>
+
+              {/* Category - FIXED */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Category *
+                </label>
+                <select
+                  required
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition text-white appearance-none"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
+                    backgroundPosition: 'right 1rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '1.5em 1.5em',
+                    paddingRight: '2.5rem',
+                  }}
+                >
+                  <option value="" className="bg-gray-900 text-white">Select category</option>
+                  <option value="AI Automation" className="bg-gray-900 text-white">AI Automation</option>
+                  <option value="Web Development" className="bg-gray-900 text-white">Web Development</option>
+                  <option value="Shopify Development" className="bg-gray-900 text-white">Shopify Development</option>
+                  <option value="Digital Marketing" className="bg-gray-900 text-white">Digital Marketing</option>
+                  <option value="Other" className="bg-gray-900 text-white">Other</option>
+                </select>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  required
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={4}
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition text-white placeholder-gray-500 resize-none"
+                  placeholder="Enter project description"
+                />
+              </div>
+
+              {/* Image Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Project Image
+                </label>
+                <div className="flex flex-col gap-4">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-blue-500 file:to-purple-600 file:text-white file:font-medium hover:file:shadow-lg hover:file:shadow-purple-500/25 transition-all"
+                  />
+                  
+                  {imagePreview && (
+                    <div className="relative rounded-xl overflow-hidden border border-white/10">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-48 object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImagePreview(null);
+                          setImageFile(null);
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = "";
+                          }
+                        }}
+                        className="absolute top-2 right-2 p-2 rounded-lg bg-red-500/80 hover:bg-red-500 transition text-white"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  {isEditing ? "Leave empty to keep current image" : "Upload a project image (optional)"}
+                </p>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="flex-1 px-6 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition text-gray-300 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 font-medium text-white shadow-lg shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Saving...
+                    </>
+                  ) : (
+                    isEditing ? "Update Project" : "Create Project"
+                  )}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-white/10 py-6 text-center text-gray-500 text-sm">
