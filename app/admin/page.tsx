@@ -15,12 +15,23 @@ interface Contact {
   message: string;
 }
 
+interface Project {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  image_url: string;
+  created_at: string;
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [user, setUser] = useState<any>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -32,7 +43,7 @@ export default function AdminPage() {
       }
 
       setUser(session.user);
-      await fetchContacts();
+      await Promise.all([fetchContacts(), fetchProjects()]);
       setLoading(false);
     };
 
@@ -65,6 +76,50 @@ export default function AdminPage() {
       setContacts(data || []);
     } catch (error) {
       console.error("Error:", error);
+    }
+  };
+
+  const fetchProjects = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching projects:", error);
+        return;
+      }
+
+      setProjects(data || []);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const handleDeleteProject = async (projectId: string) => {
+    if (!confirm("Are you sure you want to delete this project?")) return;
+
+    setDeletingProjectId(projectId);
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .delete()
+        .eq("id", projectId);
+
+      if (error) {
+        console.error("Error deleting project:", error);
+        alert("Failed to delete project. Please try again.");
+        return;
+      }
+
+      // Update UI by removing the deleted project
+      setProjects(projects.filter(project => project.id !== projectId));
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred while deleting the project.");
+    } finally {
+      setDeletingProjectId(null);
     }
   };
 
@@ -179,12 +234,9 @@ export default function AdminPage() {
               </h3>
             </div>
             <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl">
-              <p className="text-sm text-gray-400">Other Services</p>
+              <p className="text-sm text-gray-400">Total Projects</p>
               <h3 className="text-4xl font-bold mt-2 text-green-400">
-                {contacts.filter(c => 
-                  c.service !== "AI Automation" && 
-                  c.service !== "Web Development"
-                ).length}
+                {projects.length}
               </h3>
             </div>
           </motion.div>
@@ -280,6 +332,119 @@ export default function AdminPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Projects Management Section */}
+      <section className="px-6 py-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden"
+          >
+            <div className="p-6 border-b border-white/10">
+              <h2 className="text-2xl font-bold">
+                Projects <span className="text-purple-500">Management</span>
+              </h2>
+              <p className="text-sm text-gray-400 mt-1">
+                {projects.length} project{projects.length !== 1 ? "s" : ""} in portfolio
+              </p>
+            </div>
+
+            {projects.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="text-6xl mb-4">📂</div>
+                <h3 className="text-2xl font-bold text-gray-400">No Projects Yet</h3>
+                <p className="text-gray-500 mt-2">
+                  Projects you add will appear here for management.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                {projects.map((project, index) => (
+                  <motion.div
+                    key={project.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className="group relative rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:border-white/20 transition-all duration-300"
+                  >
+                    {/* Project Image */}
+                    {project.image_url ? (
+                      <div className="relative h-48 overflow-hidden bg-gray-800">
+                        <img
+                          src={project.image_url}
+                          alt={project.title}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x300/1a1a1a/ffffff?text=No+Image";
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      </div>
+                    ) : (
+                      <div className="h-48 bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+                        <span className="text-4xl">🚀</span>
+                      </div>
+                    )}
+
+                    <div className="p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-lg truncate">
+                            {project.title}
+                          </h3>
+                          <p className="text-sm text-gray-400 mt-1">
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                              project.category === "AI Automation"
+                                ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                                : project.category === "Web Development"
+                                ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
+                                : project.category === "Shopify Development"
+                                ? "bg-pink-500/20 text-pink-400 border border-pink-500/30"
+                                : project.category === "Digital Marketing"
+                                ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                                : "bg-gray-500/20 text-gray-400 border border-gray-500/30"
+                            }`}>
+                              {project.category}
+                            </span>
+                          </p>
+                        </div>
+                        
+                        {/* Delete Button */}
+                        <button
+                          onClick={() => handleDeleteProject(project.id)}
+                          disabled={deletingProjectId === project.id}
+                          className="flex-shrink-0 p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {deletingProjectId === project.id ? (
+                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                          ) : (
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
+
+                      <p className="text-sm text-gray-400 mt-3 line-clamp-3">
+                        {project.description}
+                      </p>
+
+                      <p className="text-xs text-gray-500 mt-4">
+                        {formatDate(project.created_at)}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             )}
           </motion.div>
