@@ -3,8 +3,47 @@
 import { motion } from "framer-motion";
 import HeroScene from "@/components/HeroScene";
 import OpeningAnimation from "@/components/OpeningAnimation";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+interface Project {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  image_url: string;
+  created_at: string;
+}
 
 export default function Home() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("projects")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+  console.log("SUPABASE ERROR:", error);
+  return;
+}
+
+console.log("PROJECT DATA:", data);
+        setProjects(data || []);
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
   return (
     <main className="min-h-screen bg-black text-white overflow-hidden">
 
@@ -294,7 +333,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Recent Projects */}
+      {/* Recent Projects - DYNAMIC */}
       <section id="projects" className="py-16 sm:py-24 px-4 sm:px-6 bg-white/5">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center">
@@ -304,66 +343,58 @@ export default function Home() {
             Real digital solutions built for modern businesses
           </p>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-10 sm:mt-14">
-            {[
-              {
-                title:"AI Automation System",
-                category:"🤖 AI Solutions",
-                image:"/projects/ai-automation.jpg.png",
-                desc:"Smart AI agents and automated workflows that save time and improve business efficiency."
-              },
-              {
-                title:"Web Development Platform",
-                category:"💻 Web Development",
-                image:"/projects/web-development.jpg.png",
-                desc:"Modern responsive websites built with powerful technologies and premium UI."
-              },
-              {
-                title:"Digital Marketing Campaign",
-                category:"📈 Marketing",
-                image:"/projects/digital-marketing.jpg.png",
-                desc:"Data-driven marketing strategies to increase brand growth and online presence."
-              },
-              {
-                title:"Video Editing Portfolio",
-                category:"🎬 Video Production",
-                image:"/projects/video-editing.jpg.png",
-                desc:"Creative video editing solutions for social media and business promotion."
-              },
-              {
-                title:"Brand Design & Posters",
-                category:"🎨 Creative Design",
-                image:"/projects/graphic-design.jpg.png",
-                desc:"Professional graphics, thumbnails and branding designs that stand out."
-              }
-            ].map((project,index)=>(
-              <motion.div
-                key={index}
-                initial={{ opacity:0, y:50 }}
-                whileInView={{ opacity:1, y:0 }}
-                transition={{ duration:0.5 }}
-                viewport={{ once:true }}
-                className="rounded-3xl overflow-hidden border border-white/10 bg-black/40 hover:-translate-y-3 transition duration-500"
-              >
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  className="w-full h-48 sm:h-56 object-cover"
-                />
-                <div className="p-5 sm:p-6">
-                  <span className="text-blue-400 text-xs sm:text-sm">{project.category}</span>
-                  <h3 className="text-lg sm:text-xl font-bold mt-2 sm:mt-3">{project.title}</h3>
-                  <p className="text-gray-400 mt-2 sm:mt-3 text-sm">{project.desc}</p>
-                  <a
-                    href="/contact"
-                    className="inline-block mt-4 sm:mt-6 text-blue-400 hover:text-blue-300 transition text-sm sm:text-base"
-                  >
-                    Start Similar Project →
-                  </a>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center mt-10 sm:mt-14">
+              <div className="flex flex-col items-center gap-4">
+                <svg className="animate-spin h-12 w-12 text-blue-500" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                <p className="text-gray-400">Loading projects...</p>
+              </div>
+            </div>
+          ) : projects.length === 0 ? (
+            <div className="text-center mt-10 sm:mt-14">
+              <div className="text-6xl mb-4">📂</div>
+              <h3 className="text-2xl font-bold text-gray-400">No Projects Found</h3>
+              <p className="text-gray-500 mt-2">
+                Check back soon for our latest projects.
+              </p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-10 sm:mt-14">
+              {projects.map((project, index) => (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                  viewport={{ once: true }}
+                  className="rounded-3xl overflow-hidden border border-white/10 bg-black/40 hover:-translate-y-3 transition duration-500"
+                >
+                  <img
+                    src={project.image_url || "https://via.placeholder.com/400x300/1a1a1a/ffffff?text=No+Image"}
+                    alt={project.title}
+                    className="w-full h-48 sm:h-56 object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x300/1a1a1a/ffffff?text=No+Image";
+                    }}
+                  />
+                  <div className="p-5 sm:p-6">
+                    <span className="text-blue-400 text-xs sm:text-sm">{project.category}</span>
+                    <h3 className="text-lg sm:text-xl font-bold mt-2 sm:mt-3">{project.title}</h3>
+                    <p className="text-gray-400 mt-2 sm:mt-3 text-sm line-clamp-3">{project.description}</p>
+                    <a
+                      href="/contact"
+                      className="inline-block mt-4 sm:mt-6 text-blue-400 hover:text-blue-300 transition text-sm sm:text-base"
+                    >
+                      Start Similar Project →
+                    </a>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
