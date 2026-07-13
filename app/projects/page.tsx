@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -15,7 +16,7 @@ interface Project {
   created_at: string;
 }
 
-export default function ProjectsPage() {
+function ProjectsContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category");
   
@@ -346,5 +347,13 @@ export default function ProjectsPage() {
       </footer>
 
     </main>
+  );
+}
+
+export default function ProjectsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProjectsContent />
+    </Suspense>
   );
 }
