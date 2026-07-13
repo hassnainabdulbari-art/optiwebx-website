@@ -1,89 +1,61 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import Navbar from "@/components/Navbar";
 
-const projects = [
-  {
-    title: "AI Automation System",
-    category: "AI Solutions",
-    image: "/projects/ai-automation.jpg.png",
-    description:
-      "Intelligent AI agents and automated workflows that help businesses reduce manual work and improve productivity.",
-    technologies: [
-      "OpenAI",
-      "n8n",
-      "API Integration",
-      "Automation",
-    ],
-  },
-  {
-    title: "Modern Business Website",
-    category: "Web Development",
-    image: "/projects/web-development.jpg.png",
-    description:
-      "High performance websites built with modern technologies and premium user experience.",
-    technologies: [
-      "Next.js",
-      "React",
-      "Tailwind CSS",
-      "Framer Motion",
-    ],
-  },
-  {
-    title: "Shopify E-Commerce Store",
-    category: "E-Commerce",
-    image: "/projects/shopify-store.jpg.png",
-    description:
-      "Conversion-focused Shopify stores designed for online brands and businesses.",
-    technologies: [
-      "Shopify",
-      "Liquid",
-      "Payment Integration",
-      "SEO",
-    ],
-  },
-  {
-    title: "Digital Marketing Campaign",
-    category: "Marketing",
-    image: "/projects/marketing.jpg.png",
-    description:
-      "Data-driven marketing campaigns focused on brand growth and customer acquisition.",
-    technologies: [
-      "Meta Ads",
-      "SEO",
-      "Analytics",
-      "Content Strategy",
-    ],
-  },
-  {
-    title: "AI Customer Support Agent",
-    category: "AI Agents",
-    image: "/projects/ai-agent.jpg.png",
-    description:
-      "24/7 AI customer support system that automatically handles customer queries.",
-    technologies: [
-      "LLM",
-      "Chatbot",
-      "Automation",
-      "CRM Integration",
-    ],
-  },
-  {
-    title: "Brand Identity Design",
-    category: "Creative Design",
-    image: "/projects/design.jpg.png",
-    description:
-      "Premium visual identity and creative designs that make brands stand out.",
-    technologies: [
-      "Figma",
-      "Canva",
-      "Brand Strategy",
-      "Graphics",
-    ],
-  },
-];
+interface Project {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  image_url: string;
+  created_at: string;
+}
 
 export default function ProjectsPage() {
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
+  
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentCategory, setCurrentCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      setLoading(true);
+      try {
+        let query = supabase.from("projects").select("*");
+        
+        // If category exists, filter by it
+        if (categoryParam) {
+          query = query.eq("category", categoryParam);
+          setCurrentCategory(categoryParam);
+        } else {
+          setCurrentCategory(null);
+        }
+        
+        const { data, error } = await query.order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Supabase error:", error);
+          setProjects([]);
+        } else {
+          setProjects(data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        setProjects([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, [categoryParam]);
+
   return (
     <main className="min-h-screen bg-black text-white overflow-hidden">
 
@@ -163,17 +135,41 @@ export default function ProjectsPage() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight">
-              Projects That
-              <span className="block bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text">
-                Deliver Results
-              </span>
+              {currentCategory ? (
+                <>
+                  <span className="text-blue-400">{currentCategory}</span>
+                  <span className="block bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text">
+                    Projects
+                  </span>
+                </>
+              ) : (
+                <>
+                  Projects That
+                  <span className="block bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text">
+                    Deliver Results
+                  </span>
+                </>
+              )}
             </h1>
 
             <p className="max-w-3xl mx-auto mt-4 sm:mt-8 text-gray-400 text-sm sm:text-lg">
-              Explore our latest AI automation systems, modern websites,
-              Shopify stores, digital marketing campaigns and creative
-              design projects built for business growth.
+              {currentCategory ? (
+                <>Explore our {currentCategory} projects built for business growth.</>
+              ) : (
+                <>Explore our latest AI automation systems, modern websites,
+                Shopify stores, digital marketing campaigns and creative
+                design projects built for business growth.</>
+              )}
             </p>
+
+            {currentCategory && (
+              <a
+                href="/projects"
+                className="inline-block mt-6 text-blue-400 hover:text-blue-300 transition text-sm sm:text-base"
+              >
+                ← View All Projects
+              </a>
+            )}
           </motion.div>
         </div>
       </section>
@@ -181,58 +177,81 @@ export default function ProjectsPage() {
       {/* Projects Grid */}
       <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {projects.map((project, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 60 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{
-                  duration: 0.5,
-                  delay: index * 0.08,
-                }}
-                whileHover={{
-                  y: -10,
-                  scale: 1.02,
-                }}
-                className="rounded-3xl overflow-hidden bg-white/5 border border-white/10 hover:border-blue-500/40 transition"
-              >
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  className="w-full h-48 sm:h-60 object-cover"
-                />
-                <div className="p-5 sm:p-7">
-                  <span className="text-blue-400 text-xs sm:text-sm">
-                    {project.category}
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-bold mt-2 sm:mt-3">
-                    {project.title}
-                  </h3>
-                  <p className="text-gray-400 mt-3 sm:mt-4 leading-relaxed text-sm sm:text-base">
-                    {project.description}
-                  </p>
-                  <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-4 sm:mt-6">
-                    {project.technologies.map((tech, i) => (
-                      <span
-                        key={i}
-                        className="px-2 sm:px-3 py-1 rounded-full bg-white/10 text-xs sm:text-sm text-gray-300"
-                      >
-                        {tech}
-                      </span>
-                    ))}
+          {loading ? (
+            <div className="flex items-center justify-center min-h-[300px]">
+              <div className="flex flex-col items-center gap-4">
+                <svg className="animate-spin h-12 w-12 text-blue-500" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                <p className="text-gray-400">Loading projects...</p>
+              </div>
+            </div>
+          ) : projects.length === 0 ? (
+            <div className="text-center py-10 sm:py-14">
+              <div className="text-6xl mb-4">📂</div>
+              <h3 className="text-2xl font-bold text-gray-400">No Projects Found</h3>
+              <p className="text-gray-500 mt-2">
+                {currentCategory 
+                  ? `No projects found in "${currentCategory}" category.` 
+                  : "Check back soon for our latest projects."}
+              </p>
+              {currentCategory && (
+                <a
+                  href="/projects"
+                  className="inline-block mt-6 text-blue-400 hover:text-blue-300 transition"
+                >
+                  View All Projects →
+                </a>
+              )}
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {projects.map((project, index) => (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 60 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{
+                    duration: 0.5,
+                    delay: index * 0.08,
+                  }}
+                  whileHover={{
+                    y: -10,
+                    scale: 1.02,
+                  }}
+                  className="rounded-3xl overflow-hidden bg-white/5 border border-white/10 hover:border-blue-500/40 transition"
+                >
+                  <img
+                    src={project.image_url || "https://via.placeholder.com/400x300/1a1a1a/ffffff?text=No+Image"}
+                    alt={project.title}
+                    className="w-full h-48 sm:h-60 object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x300/1a1a1a/ffffff?text=No+Image";
+                    }}
+                  />
+                  <div className="p-5 sm:p-7">
+                    <span className="text-blue-400 text-xs sm:text-sm">
+                      {project.category}
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-bold mt-2 sm:mt-3">
+                      {project.title}
+                    </h3>
+                    <p className="text-gray-400 mt-3 sm:mt-4 leading-relaxed text-sm sm:text-base line-clamp-3">
+                      {project.description}
+                    </p>
+                    <a
+                      href="/contact"
+                      className="inline-block mt-4 sm:mt-6 text-blue-400 hover:text-blue-300 transition text-sm sm:text-base"
+                    >
+                      Start Similar Project →
+                    </a>
                   </div>
-                  <a
-                    href="/contact"
-                    className="inline-block mt-4 sm:mt-6 text-blue-400 hover:text-blue-300 transition text-sm sm:text-base"
-                  >
-                    Start Similar Project →
-                  </a>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

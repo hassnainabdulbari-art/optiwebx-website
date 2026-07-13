@@ -1,5 +1,5 @@
 "use client";
-
+import AIChatWidget from "@/components/AIChatWidget";
 import { motion } from "framer-motion";
 import HeroScene from "@/components/HeroScene";
 import OpeningAnimation from "@/components/OpeningAnimation";
@@ -240,31 +240,36 @@ console.log("PROJECT DATA:", data);
                 icon:"🤖",
                 title:"AI Automation",
                 desc:"Build intelligent AI agents, chatbots and automated workflows.",
-                features:["AI Agents","n8n Automation","Business Workflows"]
+                features:["AI Agents","n8n Automation","Business Workflows"],
+                category:"AI Automation"
               },
               {
                 icon:"💻",
                 title:"Web Development",
                 desc:"Modern fast websites and custom web applications.",
-                features:["Next.js Websites","Shopify Stores","Custom Apps"]
+                features:["Next.js Websites","Shopify Stores","Custom Apps"],
+                category:"Web Development"
               },
               {
                 icon:"📈",
                 title:"Digital Marketing",
                 desc:"Grow your brand with smart marketing strategies.",
-                features:["Meta Ads","SEO","Social Growth"]
+                features:["Meta Ads","SEO","Social Growth"],
+                category:"Digital Marketing"
               },
               {
                 icon:"🎬",
                 title:"Video Editing",
                 desc:"Professional videos that increase engagement.",
-                features:["Reels Editing","YouTube Videos","Brand Ads"]
+                features:["Reels Editing","YouTube Videos","Brand Ads"],
+                category:"Video Editing"
               },
               {
                 icon:"🎨",
                 title:"Graphic Design",
                 desc:"Creative designs that make your brand stand out.",
-                features:["Thumbnails","Posters","Brand Designs"]
+                features:["Thumbnails","Posters","Brand Designs"],
+                category:"Graphic Design"
               }
             ].map((service,index)=>(
               <motion.div
@@ -287,7 +292,7 @@ console.log("PROJECT DATA:", data);
                   ))}
                 </ul>
                 <a
-                  href="/contact"
+                  href={`/projects?category=${encodeURIComponent(service.category)}`}
                   className="inline-block mt-6 sm:mt-8 text-blue-400 hover:text-blue-300 transition text-sm sm:text-base"
                 >
                   Start Similar Project →
@@ -578,7 +583,6 @@ console.log("PROJECT DATA:", data);
           </div>
         </div>
       </section>
-
       {/* Footer */}
       <footer className="border-t border-white/10 py-6 sm:py-8 text-center text-gray-400">
         <h3 className="text-xl font-bold text-white">Optiwebx</h3>
@@ -589,6 +593,9 @@ console.log("PROJECT DATA:", data);
           © 2026 Optiwebx. All rights reserved.
         </p>
       </footer>
+
+      {/* AI Chat Widget */}
+      <AIChatWidget />
 
     </main>
   );
