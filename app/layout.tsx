@@ -14,13 +14,54 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Optiwebx - AI Automation & Web Development Agency",
-  description: "Transform your business with AI automation, modern websites, and digital solutions. Optiwebx helps businesses grow with cutting-edge technology.",
-  keywords: "AI automation, web development, digital marketing, Shopify, Next.js, AI agents",
+  description:
+    "Transform your business with AI automation, modern websites, and digital solutions. Optiwebx helps businesses grow with cutting-edge technology.",
+
+  keywords: [
+    "AI Automation",
+    "Web Development",
+    "Next.js",
+    "Shopify",
+    "Digital Marketing",
+    "SEO",
+    "AI Agents",
+    "Optiwebx",
+  ],
+
   authors: [{ name: "Optiwebx" }],
+
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", type: "image/png", sizes: "32x32" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+
   openGraph: {
     title: "Optiwebx - AI Automation & Web Development Agency",
-    description: "Transform your business with AI automation, modern websites, and digital solutions.",
+    description:
+      "Transform your business with AI automation, modern websites, and digital solutions.",
+    url: "https://optiwebx-website.vercel.app",
+    siteName: "Optiwebx",
     type: "website",
+    images: [
+      {
+        url: "/icon.png",
+        width: 512,
+        height: 512,
+        alt: "Optiwebx Logo",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Optiwebx - AI Automation & Web Development Agency",
+    description:
+      "Transform your business with AI automation, modern websites, and digital solutions.",
+    images: ["/icon.png"],
   },
 };
 
@@ -41,7 +82,9 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-black">{children}</body>
+      <body className="min-h-full flex flex-col bg-black">
+        {children}
+      </body>
     </html>
   );
 }

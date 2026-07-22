@@ -1,6 +1,11 @@
 "use client";
 
+
+import Image from "next/image";
+
+
 import { useState } from "react";
+
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,15 +15,15 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl px-4 sm:px-8 py-3 sm:py-4">
         
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2 sm:gap-3">
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-xl sm:text-2xl shadow-lg">
-            O
-          </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white">
-            Opti<span className="text-blue-500">webx</span>
-          </h1>
-        </a>
-
+        
+        <a href="/" className="flex items-center">
+  <img
+    src="/logo.png"
+    alt="Optiwebx"
+    className="h-20 w-[280px] object-contain border border-red-500"
+    
+  />
+</a>
         {/* Desktop Menu */}
         <div className="hidden md:flex gap-6 lg:gap-8 text-gray-300">
           <a href="/" className="hover:text-white transition">Home</a>

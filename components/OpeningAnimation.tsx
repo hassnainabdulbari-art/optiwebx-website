@@ -1,16 +1,16 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export default function OpeningAnimation() {
   const [show, setShow] = useState(true);
 
   useEffect(() => {
-    // Animation 2.5 seconds baad hide ho jayegi
     const timer = setTimeout(() => {
       setShow(false);
-    }, 2500);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -21,97 +21,84 @@ export default function OpeningAnimation() {
         <motion.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black"
         >
-          {/* Background Glow - Blue */}
+          {/* Blue Glow - Centered Behind Logo */}
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1.2, opacity: 0.6 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-            className="absolute w-[500px] h-[500px] bg-blue-600/30 blur-[120px] rounded-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.3 }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+            className="absolute w-[600px] h-[600px] bg-blue-500 blur-[180px] rounded-full"
           />
 
-          {/* Background Glow - Purple */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1.2, opacity: 0.4 }}
-            transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
-            className="absolute w-[400px] h-[400px] bg-purple-600/20 blur-[120px] rounded-full"
-          />
-
-          {/* Main Content */}
+          {/* Main Content - Centered */}
           <div className="relative z-10 flex flex-col items-center">
-            {/* Logo Animation */}
+            {/* Logo */}
             <motion.div
-              initial={{ scale: 0, rotate: -30, opacity: 0 }}
-              animate={{ scale: 1, rotate: 0, opacity: 1 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{
-                type: "spring",
-                stiffness: 200,
-                damping: 20,
-                delay: 0.2,
+                duration: 0.6,
+                ease: "easeOut",
+                delay: 0.3,
               }}
-              className="w-28 h-28 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-5xl font-bold shadow-2xl shadow-blue-500/30"
+              className="flex items-center justify-center"
             >
-              O
+              <Image
+                src="/iconbkr.png"
+                alt="OptiWebx"
+                width={280}
+                height={280}
+                priority
+                className="w-[180px] md:w-[280px] h-auto"
+              />
             </motion.div>
-
-            {/* Title Animation */}
-            <motion.h1
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="text-4xl font-bold mt-6"
-            >
-              Opti<span className="text-blue-500">webx</span>
-            </motion.h1>
-
-            {/* Subtitle */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-              className="text-gray-400 mt-2 text-sm tracking-wider"
-            >
-              AI-POWERED DIGITAL SOLUTIONS
-            </motion.p>
 
             {/* Loading Dots */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
-              className="flex gap-2 mt-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.5,
+                ease: "easeOut",
+                delay: 0.7,
+              }}
+              className="flex items-center gap-2 mt-6"
             >
               {[0, 1, 2].map((i) => (
-                <motion.span
+                <motion.div
                   key={i}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 1 + i * 0.2 }}
-                  className="w-2.5 h-2.5 rounded-full bg-blue-500"
-                  style={{
-                    animation: `pulse-dot 1.2s ease-in-out infinite ${i * 0.2}s`,
+                  initial={{ opacity: 0.3, scale: 0.8 }}
+                  animate={{
+                    opacity: [0.3, 1, 0.3],
+                    scale: [0.8, 1, 0.8],
                   }}
+                  transition={{
+                    duration: 1.2,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                    delay: i * 0.2,
+                  }}
+                  className="w-[6px] h-[6px] rounded-full bg-blue-500"
                 />
               ))}
             </motion.div>
-          </div>
 
-          {/* Keyframes Animation */}
-          <style>{`
-            @keyframes pulse-dot {
-              0%, 100% {
-                transform: scale(1);
-                opacity: 0.3;
-              }
-              50% {
-                transform: scale(1.5);
-                opacity: 1;
-              }
-            }
-          `}</style>
+            {/* Subtle Loading Text */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{
+                duration: 0.4,
+                ease: "easeOut",
+                delay: 0.9,
+              }}
+              className="text-[12px] text-gray-500 tracking-[0.2em] mt-3 font-light"
+            >
+              Initializing Experience
+            </motion.p>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

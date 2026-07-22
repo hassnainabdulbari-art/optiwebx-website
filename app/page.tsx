@@ -1,4 +1,5 @@
 "use client";
+import Navbar from "@/components/Navbar";
 import AIChatWidget from "@/components/AIChatWidget";
 import { motion } from "framer-motion";
 import HeroScene from "@/components/HeroScene";
@@ -53,14 +54,13 @@ console.log("PROJECT DATA:", data);
       <nav className="fixed top-0 w-full z-50 px-4 sm:px-6 py-3 sm:py-5">
         <div className="max-w-7xl mx-auto flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl px-4 sm:px-8 py-3 sm:py-4">
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-xl sm:text-2xl shadow-lg">
-              O
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold">
-              Opti<span className="text-blue-500">webx</span>
-            </h1>
-          </div>
+          <div className="flex items-center">
+  <img
+    src="/logo.png"
+    alt="Optiwebx"
+    className="h-12 w-auto"
+  />
+</div>
 
           <div className="hidden md:flex gap-6 lg:gap-8 text-gray-300">
             <a href="/" className="text-white transition">Home</a>
