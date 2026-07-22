@@ -17,12 +17,16 @@ export default function Navbar() {
         {/* Logo */}
         
         <a href="/" className="flex items-center">
-  <img
+  <a href="/" className="flex items-center">
+  <Image
     src="/logo.png"
-    alt="Optiwebx"
-    className="h-20 w-[280px] object-contain border border-red-500"
-    
+    alt="OptiWebx"
+    width={280}
+    height={80}
+    priority
+    className="h-16 w-auto object-contain"
   />
+</a>
 </a>
         {/* Desktop Menu */}
         <div className="hidden md:flex gap-6 lg:gap-8 text-gray-300">
